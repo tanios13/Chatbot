@@ -1,40 +1,91 @@
 # Documentation of LangChain
-The primary goal of LangChain is to enable developers to build applications that can understand, generate, and interact with human-like text. We start by selecting one of the model provided by LangChain. Create prompts that serve as the input format to the language model. Once the input provided, we generate the response by sending the prompts to the language model. Depending on the model configuration, the model handle the response. 
+LangChain is a framework for developing applications powered by language models. It enables applications that are:
+- Data-aware: connect a language model to other sources of data,
+- Agentic: allow a language model to interact with its environment.
 
-## Model
-The LangChain framework provides a standard interface to models: [Visit Models Documentation](https://python.langchain.com/en/latest/modules/models/getting_started.html):
+The main value props of LangChain are:
 
-1. LLMs: LLMs are designed to generate coherent and contextually relevant text based on a given prompt. LangChain provides wrappers for OpenAI, Cohere, Hugging Face... available in the __llms__ class. LangChain provide [documentation for these wrappers](https://python.langchain.com/en/latest/modules/models/llms/getting_started.html)
+- Components: abstractions for working with language models, along with a collection of implementations for each abstraction. Components are modular and easy-to-use, whether you are using the rest of the LangChain framework or not,
+- Off-the-shelf chains: a structured assembly of components for accomplishing specific higher-level tasks.
+Off-the-shelf chains make it easy to get started. For more complex applications and nuanced use-cases, components make it easy to customize existing chains or build new ones.
 
-2. Chat Models: Chat models are specifically designed for conversational interactions. Unlike LLMs, chat models take into account the conversational context and history to generate contextually appropriate responses. LangChain provides wrappers for ChatOpenAI (gpt-3.5-turbo), googlePalm... available in the __chat_models__ class. LangChain provide [documentation for these wrappers](https://python.langchain.com/en/latest/modules/models/chat/getting_started.html)
+# Use Cases
+The Langchain library has a walkthroughs of common end-to-end use cases.
 
-3. Text Embedding Models: Text embedding model is convert text into a compact and dense numerical representation that captures the semantic meaning and relationships between words or documents, facilitating downstream NLP tasks. LangChain provides wrappers for OpenAI, Cohere, Hugging Face... available in the __embeddings__ class. LangChain provide [documentation for these wrappers](https://python.langchain.com/en/latest/modules/models/text_embedding.html)
+See [documentation](https://python.langchain.com/docs/use_cases)
 
+# Model I/O 
+The core building blocks for a language model application are:
+- [Prompts](#prompts): Prompts refer to the input to the model. We generally use *Prompt Template* or *Example Selectors*.
+- [Language Models](#language-models): Make calls to language models through common interfaces
+- [Output Parsers](#output-parsers): Extract information from model outputs
 
+![image](images/Architecture.png)
 ## Prompts
-Prompts refer to the input to the model. We generally use *PromptTemplate* [Visit Prompts Documentation](https://python.langchain.com/en/latest/modules/prompts.html).
+### Prompt Template
+A prompt template refers to a reproducible way to generate a prompt. It contains a text string ("the template"), that can take in a set of parameters from the end user and generates a prompt.
 
-The API provides __Selectors__ to choose which example to include in a prompt ([documentation](https://python.langchain.com/en/latest/modules/prompts/example_selectors.html)).
+A prompt template can contain:
 
-The API also provides __Output Parsers__ that help structure language model responses.([documentation](https://python.langchain.com/en/latest/modules/prompts/output_parsers.html)).
+- instructions to the language model,
+- a set of few shot examples to help the language model generate a better response,
+- a question to the language model.
 
-## Memory
-You want the model to remember what was said before, especially when developping chatbots. LangChain provides an API and a guide to do that: [documentation](https://python.langchain.com/en/latest/modules/memory.html).
+### Example Selectors
+If you have a large number of examples, you may need to select which ones to include in the prompt. The Example Selector is the class responsible for doing so.
 
-## Chains
+
+## Language Models
+If you are using a specific model it's recommended you use the methods specific to that model class (i.e., "predict" for LLMs and "predict messages" for Chat Models)
+
+### LLMs
+Models that take a text string as input and return a text string. LLMs in LangChain refer to pure text completion models. The APIs they wrap take a string prompt as input and output a string completion. LangChain provides wrappers for OpenAI, Cohere, Hugging Face... available in the llms class.
+
+
+### Chat Models
+Chat models are often backed by LLMs but tuned specifically for having conversations. Unlike LLMs, chat models take into account the conversational context and history to generate contextually appropriate responses. LangChain provides wrappers for ChatOpenAI (gpt-3.5-turbo), googlePalm... available in the chat_models class.
+
+
+## Output parsers
+Output parsers are classes that help structure language model responses. There are two main methods an output parser must implement:
+
+"Get format instructions": A method which returns a string containing instructions for how the output of a language model should be formatted.
+"Parse": A method which takes in a string (assumed to be the response from a language model) and parses it into some structure.
+
+
+# Data connection
+Many LLM applications require user-specific data that is not part of the model's training set. LangChain gives you the building blocks to load, transform, store and query your data via:
+
+- Document loaders: Load documents from many different sources
+- Document transformers: Split documents, drop redundant documents, and more
+- Text embedding models: Take unstructured text and turn it into a list of floating point numbers
+- Vector stores: Store and search over embedded data
+- Retrievers: Query your data
+
+![image](images/DataConnection.png)
+
+# Chains
 It is the most important key block of LangChain. It combines a LLM with a template and we can combines these blocks together to carry on a sequence of operations on the data and lead to a step by step thinking of the model. Some of these chains models are:
 
-1. LLM Chain: Basic chain techniques where we chain the prompt with the model. [See documentation](https://python.langchain.com/en/latest/modules/chains/getting_started.html)
+1. LLM Chain: Basic chain techniques where we chain the prompt with the model.
 
-2. Sequential Chains: Run chain one after the other. [See documentation](https://python.langchain.com/en/latest/modules/chains/generic/sequential_chains.html)
+2. Sequential Chains: Run chain one after the other.
 
-3. Router Chain: More complicated than the others. You built sub-chains each of which specialised for some input (can be classified depending on the subject). [See documentation](https://python.langchain.com/en/latest/modules/chains/generic/router.html)
+3. Router Chain: More complicated than the others. You built sub-chains each of which specialised for some input (can be classified depending on the subject).
 
-4. Question Answering over documents: Answer question on a document and data which the model were not trained on, which makes it much more flexible. [See Documentation](https://python.langchain.com/en/latest/modules/chains/index_examples/question_answering.html)
+4. Question Answering over documents: Answer question on a document and data which the model were not trained on, which makes it much more flexible.
 
+# Agents
+An agent has access to a suite of tools, and determines which ones to use depending on the user input. Agents can use multiple tools, and use the output of one tool as the input to the next.
 
-## Callbacks and Evaluation
-LangChain also provides an API to evaluate how the application is doing. [See Documentation](https://python.langchain.com/en/latest/modules/callbacks/getting_started.html)
+There are two main types of agents:
 
-## Agents
-Some applications require not just a predetermined chain of calls to LLMs/other tools, but potentially an unknown chain that depends on the user’s input. In these types of chains, there is an [agent](https://python.langchain.com/en/latest/modules/agents.html) which has access to a suite of tools.
+Action agents: at each timestep, decide on the next action using the outputs of all previous actions
+Plan-and-execute agents: decide on the full sequence of actions up front, then execute them all without updating the plan
+Action agents are suitable for small tasks, while plan-and-execute agents are better for complex or long-running tasks that require maintaining long-term objectives and focus. 
+
+# Memory
+LangChain provides memory components in two forms. First, LangChain provides helper utilities for managing and manipulating previous chat messages. These are designed to be modular and useful regardless of how they are used. Secondly, LangChain provides easy ways to incorporate these utilities into chains.
+
+# Callbacks
+LangChain provides a callbacks system that allows you to hook into the various stages of your LLM application. This is useful for logging, monitoring, streaming, and other tasks.
