@@ -5,4 +5,9 @@ images/LLMs.png
 chatbotusj.egg-info
 
 # Ignore scraped text as it is too big
-data/text_data.txt
+data/scraped_text/
+
+__pycache__
+
+# ignore chroma
+.chroma/

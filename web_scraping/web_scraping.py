@@ -23,15 +23,18 @@ def web_scrape(links):
         text = extract_text(link)
         cleaned_text = clean_text(text)
 
-        with open(Path.ScrapedText.value, 'a') as file:
+        # Get the filename
+        filename = link.split("/")[3]
+        if filename not in ["admission", "international", "aide", "servicesocial", "sio", "sip"]:
+            filename = "institutions"
+            
+        with open("../data/scraped_text/" + filename + ".txt", 'a') as file:
             file.write(link + "\n")
 
             for t in cleaned_text:
                 file.write(t + "\n")    
 
             file.write("------------------------------------------------------\n")
-
-    file.close()
 
 
 def extract_text(link):
