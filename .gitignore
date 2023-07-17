@@ -1,3 +1,8 @@
+# Ignore LLMs description
 images/LLMs.png
 
+# Ignore setup file
 chatbotusj.egg-info
+
+# Ignore scraped text as it is too big
+data/text_data.txt
