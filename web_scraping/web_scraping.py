@@ -19,18 +19,17 @@ def web_scrape(links):
         file.write('')  # Write an empty string to clear the file
 
         
-    for link in scraped_links:
+    for link in links:
         text = extract_text(link)
         cleaned_text = clean_text(text)
 
         with open(Path.ScrapedText.value, 'a') as file:
-            file.write(link)
+            file.write(link + "\n")
 
             for t in cleaned_text:
                 file.write(t + "\n")    
 
-            file.write("------------------------------------------------------")
-            file.write("\n")
+            file.write("------------------------------------------------------\n")
 
     file.close()
 
