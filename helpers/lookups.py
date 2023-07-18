@@ -6,4 +6,4 @@ class Url(Enum):
 class Path(Enum):
     Links = "../data/links.txt"
     ScrapedLinks = "../data/scraped_links.pkl"
-    ScrapedText = "../data/text_data.txt"
+    ScrapedText = "../data/scraped_text/"

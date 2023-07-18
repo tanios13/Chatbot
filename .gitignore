@@ -1,5 +1,5 @@
 # Ignore LLMs description
-images/LLMs.png
+LLMs.png
 
 # Ignore setup file
 chatbotusj.egg-info

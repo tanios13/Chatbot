@@ -1,72 +1,75 @@
 import requests
 import nltk
+import pickle
 
 from helpers.lookups import Path
+from helpers.constants import Constants
+
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from bs4 import BeautifulSoup
 
+class WebScraper():
 
-def web_scrape(links):
-    """ Scrape the text from the list of links"""
+    def __init__(self, links_pkl):
+        with open(links_pkl.value, 'rb') as file:
+            self.links = pickle.load(file)
 
-    # Download dependencies
-    nltk.download('stopwords')
-    nltk.download('punkt')
+    def scrape(self):
+        """ Scrape the text from the list of links"""
 
-    # Open the file in write mode to clean it
-    with open(Path.ScrapedText.value, 'w') as file:
-        file.write('')  # Write an empty string to clear the file
-
+        # Download dependencies
+        nltk.download('stopwords')
+        nltk.download('punkt')
         
-    for link in links:
-        text = extract_text(link)
-        cleaned_text = clean_text(text)
+        for link in self.links:
+            text = self.extract_text(link)
+            cleaned_text = self.clean_text(text)
 
-        # Get the filename
-        filename = link.split("/")[3]
-        if filename not in ["admission", "international", "aide", "servicesocial", "sio", "sip"]:
-            filename = "institutions"
+            # Get the filename
+            filename = link.split("/")[3]
+            if filename not in ["admission", "international", "aide", "servicesocial", "sio", "sip"]:
+                filename = "institutions"
             
-        with open("../data/scraped_text/" + filename + ".txt", 'a') as file:
-            file.write(link + "\n")
+            with open(Path.ScrapedText.value + filename + ".txt", 'a') as file:
+                file.write(link + "\n")
 
-            for t in cleaned_text:
-                file.write(t + "\n")    
+                for t in cleaned_text:
+                    file.write(t + "\n")    
 
-            file.write("------------------------------------------------------\n")
+                file.write(Constants.TextSeparator.value)
 
 
-def extract_text(link):
-    """ Extract text from link """
+    def extract_text(self, link):
+        """ Extract text from link """
     
-    response = requests.get(link)
-    soup = BeautifulSoup(response.content, "html.parser")
+        response = requests.get(link)
+        soup = BeautifulSoup(response.content, "html.parser")
 
-    # Fetch the description of the title
-    body = soup.find_all("p")
-    paragraphs = []
-    for paragraph in body:
-        paragraphs.append(paragraph.text)
+        # Fetch the description of the title
+        body = soup.find_all("p")
+        paragraphs = []
+        for paragraph in body:
+            paragraphs.append(paragraph.text)
 
-    return paragraphs
+        return paragraphs
 
-def clean_text(data):
-    """ Clean the list of strings """
+    def clean_text(self, data):
+        """ Clean the list of strings """
 
-    # Get the list stopwords
-    stop_words = set(stopwords.words('english'))
+        # Get the list of stopwords
+        stop_words = set(stopwords.words('english'))
 
-    cleaned_data = []
-    for sentence in data:
-        # Tokenize the sentence
-        tokens = word_tokenize(sentence)
-        # Remove stopwords and convert to lowercase
-        cleaned_tokens = [token for token in tokens if token.lower() not in stop_words]
-        # Join the cleaned tokens back into a sentence
-        cleaned_sentence = " ".join(cleaned_tokens)
-        # Remove empty sentences
-        if cleaned_sentence:
-            cleaned_data.append(cleaned_sentence)
+        cleaned_data = []
+        for sentence in data:
+            # Tokenize the sentence
+            tokens = word_tokenize(sentence)
+            # Remove stopwords and convert to lowercase
+            cleaned_tokens = [token for token in tokens if token.lower() not in stop_words]
+            # Join the cleaned tokens back into a sentence
+            cleaned_sentence = " ".join(cleaned_tokens)
+            # Remove empty sentences
+            if cleaned_sentence:
+                cleaned_data.append(cleaned_sentence)
     
-    return cleaned_data
+        return cleaned_data
