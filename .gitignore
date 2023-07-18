@@ -4,9 +4,6 @@ images/LLMs.png
 # Ignore setup file
 chatbotusj.egg-info
 
-# Ignore scraped text as it is too big
-data/scraped_text/
-
 __pycache__
 
 # ignore chroma
