@@ -5,6 +5,3 @@ LLMs.png
 chatbotusj.egg-info
 
 __pycache__
-
-# ignore chroma
-.chroma/
