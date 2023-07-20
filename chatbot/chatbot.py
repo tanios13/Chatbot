@@ -6,7 +6,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Pinecone
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
-from langchain.chains import RetrievalQA
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
 
 from helpers.constants import Constants
 
@@ -24,6 +25,10 @@ class Chatbot():
         self._embeddings = OpenAIEmbeddings()
         self.vectorstore = self._init_pinecone(existing_index)
         self._llm = ChatOpenAI(model_name=model_name, temperature=0)
+        self._memory = ConversationBufferMemory(
+            memory_key="chat_history",
+            return_messages=True
+        )
 
 
     def add_dir(self, dir_path, separator):
@@ -37,16 +42,20 @@ class Chatbot():
         pass
 
 
-    def answer_query(self, query):
+    def answer_question(self, question):
         if self.vectorstore == None:
             print("Vector Store is Empty")
         else:
-            qa_chain = RetrievalQA.from_chain_type(
-                        self._llm,
-                        retriever=self.vectorstore.as_retriever()
+            qa_chain = ConversationalRetrievalChain.from_llm(
+                        llm=self._llm,
+                        retriever=self.vectorstore.as_retriever(),
+                        memory=self._memory
                     )
             
-            return qa_chain({"query": query})
+            return qa_chain({"question": question})
+        
+    def clear_history(self):
+        self._memory.clear()
     
 #----------------------------------------------------------------------------HELPERS----------------------------------------------------------------
 
