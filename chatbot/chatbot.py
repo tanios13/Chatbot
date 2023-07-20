@@ -44,7 +44,8 @@ class Chatbot():
 
     def answer_question(self, question):
         if self.vectorstore == None:
-            print("Vector Store is Empty")
+            return "Cannot answer from empty Vector Store is Empty"
+
         else:
             qa_chain = ConversationalRetrievalChain.from_llm(
                         llm=self._llm,
@@ -113,6 +114,7 @@ class Chatbot():
             chunk_size = 3000,
             chunk_overlap = 200,
             separators=separator + "\n",
+            keep_separator=False
         )
 
         # Iterate over the scraped data
