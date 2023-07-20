@@ -20,9 +20,8 @@ def main():
     # Text input to ask a question
     user_question = st.text_input("Ask a question about admission, international, help, financial support, insitutions and more:")
         
-    if st.button("Submit") and user_question:
     # Query answer from bot until success
-        query_answer(chatbot, user_question)
+    query_answer(chatbot, user_question)
     
     if st.session_state['generated']:
 
@@ -34,11 +33,12 @@ def main():
 def query_answer(chatbot, user_question):
     # Your code block goes here
     try:
-        # Get the bot's response
-        bot_response = chatbot.answer_question(user_question)["answer"]
+        if st.button("Submit") and user_question:
+            # Get the bot's response
+            bot_response = chatbot.answer_question(user_question)["answer"]
 
-        st.session_state.past.append(user_question)
-        st.session_state.generated.append(bot_response)
+            st.session_state.past.append(user_question)
+            st.session_state.generated.append(bot_response)
 
     except Exception as e:
         # Clear the cache to force re-execution of st.cache functions
