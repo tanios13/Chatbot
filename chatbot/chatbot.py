@@ -2,7 +2,7 @@ import os
 import pinecone
 
 from langchain.document_loaders import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Pinecone
 from langchain.embeddings import OpenAIEmbeddings
 
@@ -21,7 +21,23 @@ class Chatbot():
         self.init_vectorstore = False
         self.embeddings = OpenAIEmbeddings()
 
+        self._init_pinecone(create_index)
 
+
+    def add_dir(self, dir_path, separator):
+        # Load and split the documents in the dir
+        docs = self._load_dir(dir_path, separator)
+
+        # Add them to the vectorstore
+        self._store_docs(docs)
+
+    def add_pdf(self, pdf_path):
+        pass
+
+    
+#----------------------------------------------------------------------------HELPERS----------------------------------------------------------------
+
+    def _init_pinecone(self, create_index):
         # init the pinecone
         pinecone_api_key = os.getenv("PINECONE_API_KEY")
         pinecone.init(api_key=pinecone_api_key, environment="us-west1-gcp-free")
@@ -34,19 +50,12 @@ class Chatbot():
 
         if create_index:
             # Check if index already exists
-            if index_name in pinecone.list_indexes():
-                pinecone.delete_index(index_name)
+            if self.index_name in pinecone.list_indexes():
+                pinecone.delete_index(self.index_name)
 
             # Create index
-            pinecone.create_index(index_name, dimension=Constants.OpenAIEmbeddingsDimension.value)
+            pinecone.create_index(self.index_name, dimension=Constants.OpenAIEmbeddingsDimension.value)
 
-
-    def add_dir(self, dir_path, separator):
-        # Load and split the documents in the dir
-        docs = self._load_dir(dir_path, separator)
-
-        # Add them to the vectorstore
-        self._store_docs(docs)
 
 
     def _store_docs(self, docs):
@@ -56,11 +65,13 @@ class Chatbot():
             self.vectorstore.add_texts([doc.page_content for doc in docs])
         else:
             # If the index isn't initiliazed initialize it with the documents
-            self.vectorstore = Pinecone.from_texts(texts=[doc.page_content for doc in docs], embedding=self.embeddings, index_name=self.index_name)
+            self.vectorstore = Pinecone.from_documents(documents=docs, embedding=self.embeddings, index_name=self.index_name)
+
+
+
 
 #-----------------------------------------------------------------------TEXT DIR HANDLER-----------------------------------------------------------------------------
 
-    # TODO see how to remove prints from splitting
     def _load_dir(self, dir_path, separator):
         """
         Load and split the documents in the dir using the separator for each txt in the dir
@@ -69,10 +80,10 @@ class Chatbot():
 
         docs = []
 
-        c_splitter = CharacterTextSplitter(
-            chunk_size = 10,
-            chunk_overlap = 5,
-            separator=separator.value
+        c_splitter = RecursiveCharacterTextSplitter(
+            chunk_size = 3000,
+            chunk_overlap = 200,
+            separators=separator + "\n",
         )
 
         # Iterate over the scraped data
