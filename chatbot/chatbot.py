@@ -5,11 +5,13 @@ from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Pinecone
 from langchain.embeddings import OpenAIEmbeddings
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import RetrievalQA
 
 from helpers.constants import Constants
 
 class Chatbot():
-    def __init__(self, index_name, create_index):
+    def __init__(self, model_name, index_name, existing_index):
         """
         
         Arguments:
@@ -18,10 +20,10 @@ class Chatbot():
         """
 
         self.index_name = index_name
-        self.init_vectorstore = False
-        self.embeddings = OpenAIEmbeddings()
-
-        self._init_pinecone(create_index)
+        self._init_vectorstore = False
+        self._embeddings = OpenAIEmbeddings()
+        self.vectorstore = self._init_pinecone(existing_index)
+        self._llm = ChatOpenAI(model_name=model_name, temperature=0)
 
 
     def add_dir(self, dir_path, separator):
@@ -34,21 +36,32 @@ class Chatbot():
     def add_pdf(self, pdf_path):
         pass
 
+
+    def answer_query(self, query):
+        if self.vectorstore == None:
+            print("Vector Store is Empty")
+        else:
+            qa_chain = RetrievalQA.from_chain_type(
+                        self._llm,
+                        retriever=self.vectorstore.as_retriever()
+                    )
+            
+            return qa_chain({"query": query})
     
 #----------------------------------------------------------------------------HELPERS----------------------------------------------------------------
 
-    def _init_pinecone(self, create_index):
+    def _init_pinecone(self, existing_index):
         # init the pinecone
         pinecone_api_key = os.getenv("PINECONE_API_KEY")
         pinecone.init(api_key=pinecone_api_key, environment="us-west1-gcp-free")
         
         # Check pinecone version
-        version_info = pinecone.info.version()
-        server_version = ".".join(version_info.server.split(".")[:2])
-        client_version = ".".join(version_info.client.split(".")[:2])
+        #version_info = pinecone.info.version()
+        #server_version = ".".join(version_info.server.split(".")[:2])
+        #client_version = ".".join(version_info.client.split(".")[:2])
         #assert client_version == server_version, "Please upgrade pinecone-client."
 
-        if create_index:
+        if not existing_index:
             # Check if index already exists
             if self.index_name in pinecone.list_indexes():
                 pinecone.delete_index(self.index_name)
@@ -56,17 +69,24 @@ class Chatbot():
             # Create index
             pinecone.create_index(self.index_name, dimension=Constants.OpenAIEmbeddingsDimension.value)
 
+            return None
+
+        elif self.index_name in pinecone.list_indexes():
+            self._init_pinecone = True
+            return Pinecone.from_existing_index(self.index_name, self._embeddings, "text")
+
 
 
     def _store_docs(self, docs):
-        if self.init_vectorstore:
+        if self._init_vectorstore:
+            # If the vector store is not empty and thus already initialized
             index = pinecone.Index(self.index_name)
-            self.vectorstore = Pinecone(index, embedding_function=self.embeddings.embed_query, text_key="text")
-            self.vectorstore.add_texts([doc.page_content for doc in docs])
+            self.vectorstore = Pinecone(index, embedding_function=self._embeddings.embed_query, text_key="text")
+            self.vectorstore.add_documents(documents=docs)
         else:
             # If the index isn't initiliazed initialize it with the documents
-            self.vectorstore = Pinecone.from_documents(documents=docs, embedding=self.embeddings, index_name=self.index_name)
-
+            self.vectorstore = Pinecone.from_documents(documents=docs, embedding=self._embeddings, index_name=self.index_name)
+            self._init_pinecone = True
 
 
 
