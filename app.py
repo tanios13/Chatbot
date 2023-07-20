@@ -18,7 +18,7 @@ def main():
     chatbot = Chatbot(model_name=Constants.ModelName.value, index_name=Constants.PineconeIndex.value, existing_index=True)
 
     # Text input to ask a question
-    user_question = st.text_input("Ask a question:")
+    user_question = st.text_input("Ask a question about admission, international, help, financial support, insitutions and more:")
         
     if st.button("Submit") and user_question:
     # Query answer from bot until success

@@ -5,3 +5,5 @@ LLMs.png
 chatbotusj.egg-info
 
 __pycache__
+
+secrets.toml
