@@ -1,5 +1,5 @@
 import streamlit as st
-import requests
+import time
 
 from streamlit_chat import message
 from chatbot.chatbot import Chatbot
@@ -19,8 +19,8 @@ def main():
 
     # Text input to ask a question
     user_question = st.text_input("Ask a question about admission, international, help, financial support, insitutions and more:")
-        
-    if st.button("Submit") and user_question:
+    
+    if user_question:
         # Query answer from bot until success
         query_answer(chatbot, user_question)
     
@@ -34,6 +34,9 @@ def main():
 def query_answer(chatbot, user_question):
     # Your code block goes here
     try:
+        # Clear the cache to force re-execution of st.cache functions
+        st.cache_data.clear()
+
         # Get the bot's response
         bot_response = chatbot.answer_question(user_question)["answer"]
 
@@ -41,9 +44,6 @@ def query_answer(chatbot, user_question):
         st.session_state.generated.append(bot_response)
 
     except Exception as e:
-        # Clear the cache to force re-execution of st.cache functions
-        st.cache_resource.clear()
-
         # Retry the code block
         query_answer(chatbot, user_question)
 
