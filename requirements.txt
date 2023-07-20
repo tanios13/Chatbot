@@ -7,3 +7,4 @@ unstructured
 openai
 chromadb
 tiktoken
+pinecone-client

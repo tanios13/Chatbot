@@ -32,4 +32,11 @@ conda deactivate env_name
 conda activate env_name
 ```
 
-6. Use your new env as your python interpreter in your editor.
+6. Export the PINECONE api key
+```sh
+conda env config vars set PINECONE_API_KEY=sky
+conda deactivate env_name
+conda activate env_name
+```
+
+7. Use your new env as your python interpreter in your editor.
