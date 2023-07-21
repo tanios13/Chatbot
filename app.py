@@ -14,12 +14,17 @@ def main():
     if 'past' not in st.session_state:
         st.session_state['past'] = []
 
+    if 'user_input' not in st.session_state:
+        st.session_state['user_input'] = ''
+
     # Initialize our chatbot (Make sure training text in data/scraped_text/)
     chatbot = Chatbot(model_name=Constants.ModelName.value, index_name=Constants.PineconeIndex.value, existing_index=True)
 
     # Text input to ask a question
-    user_question = st.text_input("Ask a question about admission, international, help, financial support, insitutions and more:")
+    st.text_input("Ask anything about licenses, admission, international, help, financial support, insitutions and more:", key="widget", on_change=submit)
     
+    user_question = st.session_state["user_input"]
+
     if user_question:
         # Query answer from bot until success
         query_answer(chatbot, user_question)
@@ -46,6 +51,11 @@ def query_answer(chatbot, user_question):
     except Exception as e:
         # Retry the code block
         query_answer(chatbot, user_question)
+
+
+def submit():
+    st.session_state['user_input'] = st.session_state['widget']
+    st.session_state['widget'] = ''
 
 
 if __name__ == "__main__":
