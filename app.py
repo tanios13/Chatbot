@@ -23,7 +23,8 @@ def main():
     chatbot = Chatbot(model_name=Constants.ModelName.value, index_name=Constants.PineconeIndex.value, existing_index=True)
 
     # Text input to ask a question
-    st.text_input("Ask anything about licenses, admission, international, help, financial support, insitutions and more:", key="widget", on_change=submit)
+    st.markdown("Ask anything about licenses, admission, international, help, financial support, insitutions and more:")
+    st.text_input(label="text_input", key="widget", on_change=submit, label_visibility="collapsed")
     
     user_question = st.session_state["user_input"]
 
@@ -59,23 +60,27 @@ def submit():
     st.session_state['user_input'] = st.session_state['widget']
     st.session_state['widget'] = ''
 
+
 def set_markdown():
-    # Custom CSS to set the background image
+    # Custom CSS to set the background image and other styles
     st.markdown(
         f"""
         <style>
         .stApp {{
-            background-image: url("https://magazine.com.lb/images/stories/3070/general/univ-usj4.jpg");
-            background-attachment: fixed;
-            background-size: cover;
-            backdrop-filter: blur(2000px); /* Adjust the blur intensity as needed */
+            background-color: #444; /* Set the background color to dark gray (#111) */
         }}
         .stTextInput input {{
             background-color: rgba(255, 255, 255, 0.8); /* Adjust the background color and opacity */
-            color: #000000; /* Change the text color */
+            color: black; /* Change the text color */
             border: 1px solid #cccccc; /* Add a border to the text input */
             border-radius: 8px; /* Round the corners of the text input */
             padding: 8px 12px; /* Adjust the padding as needed */
+        }}
+        .stMarkdown {{
+            color: white; /* Set the color of the text above the input box to white */
+        }}
+        h1 {{
+            color: white;
         }}
         </style>
         """,
