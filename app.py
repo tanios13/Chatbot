@@ -1,11 +1,13 @@
 import streamlit as st
-import time
 
 from streamlit_chat import message
 from chatbot.chatbot import Chatbot
 from helpers.constants import Constants
 
+
 def main():
+    set_markdown()
+
     st.title("Chat with USJ")
 
     if 'generated' not in st.session_state:
@@ -57,6 +59,28 @@ def submit():
     st.session_state['user_input'] = st.session_state['widget']
     st.session_state['widget'] = ''
 
+def set_markdown():
+    # Custom CSS to set the background image
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("https://magazine.com.lb/images/stories/3070/general/univ-usj4.jpg");
+            background-attachment: fixed;
+            background-size: cover;
+            backdrop-filter: blur(2000px); /* Adjust the blur intensity as needed */
+        }}
+        .stTextInput input {{
+            background-color: rgba(255, 255, 255, 0.8); /* Adjust the background color and opacity */
+            color: #000000; /* Change the text color */
+            border: 1px solid #cccccc; /* Add a border to the text input */
+            border-radius: 8px; /* Round the corners of the text input */
+            padding: 8px 12px; /* Adjust the padding as needed */
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 if __name__ == "__main__":
     main()
