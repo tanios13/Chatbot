@@ -9,4 +9,3 @@ chromadb
 tiktoken
 pinecone-client
 streamlit
-streamlit-chat

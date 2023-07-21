@@ -2,6 +2,8 @@
 <!-- Prediction of Student Dropout -->
 In this project, we implement chatbot trained on our own data (Admissions, Insitutions, Professional Insertion...). This chatbot answers any questions about these data.
 
+![image](data/overview.png)
+
 ## Installation
 This shows how to setup the environement with anaconda to run the project
 
