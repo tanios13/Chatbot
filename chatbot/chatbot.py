@@ -8,6 +8,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
+from langchain.document_loaders import UnstructuredPDFLoader
 
 from helpers.constants import Constants
 
@@ -39,7 +40,11 @@ class Chatbot():
         self._store_docs(docs)
 
     def add_pdf(self, pdf_path):
-        pass
+        # Load and split the pdf
+        docs = self._load_pdf(pdf_path)
+
+        # Add them to the vectorstore
+        self._store_docs(docs)
 
 
     def answer_question(self, question):
@@ -84,6 +89,10 @@ class Chatbot():
         elif self.index_name in pinecone.list_indexes():
             self._init_pinecone = True
             return Pinecone.from_existing_index(self.index_name, self._embeddings, "text")
+
+        else:
+            print("Couldn't find PineCone Index")
+            return None
 
 
 
@@ -134,5 +143,14 @@ class Chatbot():
 
 #------------------------------------------------------------------------PDF HANDLER--------------------------------------------------------------------------
 
-    def _load_pdf(pdf):
-        pass
+    def _load_pdf(self, pdf_path):
+        # Load the pdf
+        loader = UnstructuredPDFLoader(pdf_path, mode="paged")
+        docs = loader.load()
+
+        keys_to_remove = ["coordinates", "filename", "file_directory", "filetype", "source", "points", "system", "layout_width", "layout_height"]
+        for doc in docs:
+            for key in keys_to_remove:
+                doc.metadata.pop(key, None)
+
+        return docs
